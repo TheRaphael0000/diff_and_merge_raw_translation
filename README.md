@@ -34,8 +34,9 @@ python cli.py "translation" "raw" "output" -t 17 -y -q
 
 -   [x] Algorithm
 -   [x] CLI
+-   [ ] Use os.walk instead of os.listfiles when loading images to handle subfolder, and also verify that we only load images without crashes.
 -   [ ] GUI : to check that the diff&merge is correct and to adapt the threshold
--   [ ] Visual example for the README.md
--   [ ] Verify the requirements.txt
--   [ ] Setuptools : To install the package with a script (include a script for the cli and the gui)
+-   [ ] README.md : Visual example of the algorithm.
+-   [ ] Package : Create a proper python package
+-   [ ] Setuptools : Create the setup.py script (include a script to run the cli and the gui)
 -   [ ] Pypi : Publish to pypi
