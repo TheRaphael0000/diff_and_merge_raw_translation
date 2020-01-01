@@ -1,0 +1,2 @@
+Pillow==6.0.0
+ImageHash==4.0
