@@ -1,26 +1,34 @@
 import sys
-import random
 import os
 
 from PySide2.QtWidgets import QApplication, QLabel, QPushButton, QFileDialog
 from PySide2.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget, QListWidget
-from PySide2.QtCore import Slot, Qt
+from PySide2.QtCore import Qt
 from PySide2.QtGui import QPixmap
 
+from diff_and_merge import DiffMerge
 
-class ImageViewer(QWidget):
-    def load_files(self, x):
-        self.folder = str(QFileDialog.getExistingDirectory(
-            self, "Select Directory"))
 
-        self.select.setText(self.folder)
-        fs = os.listdir(self.folder)
+class Picker(QWidget):
+    def __init__(self, str_folder, img):
+        QWidget.__init__(self)
 
-        while self.list.count() > 0:
-            self.list.takeItem(0)
+        self.setMaximumWidth(400)
 
-        for f in fs:
-            self.list.addItem(f)
+        self.folder = None
+        self.files = []
+        self.img = img
+
+        self.v = QVBoxLayout()
+        self.select = QPushButton(str_folder)
+        self.list = QListWidget()
+
+        self.v.addWidget(self.select)
+        self.v.addWidget(self.list)
+
+        self.setLayout(self.v)
+
+        self.list.currentItemChanged.connect(self.load_image)
 
     def load_image(self, item):
         filename = item.text()
@@ -29,35 +37,41 @@ class ImageViewer(QWidget):
         w = self.img.width()
         h = self.img.height()
         self.img.setPixmap(img.scaled(w, h, Qt.KeepAspectRatio))
-        print(path)
 
-    def __init__(self, str_folder, str_validate):
-        QWidget.__init__(self)
+    def update_files(self, files):
+        self.files = files
+        while self.list.count() > 0:
+            self.list.takeItem(0)
 
-        self.folder = None
+        for f in self.files:
+            self.list.addItem(f)
 
-        self.v = QVBoxLayout()
-        self.h = QHBoxLayout()
-        self.select = QPushButton(str_folder)
-        self.img = QLabel()
-        self.validate = QPushButton(str_validate)
-        self.img.setMinimumSize(600, 300)
-        # self.img.setMinimumSize(100, 100)
-        # self.img.setScaledContents(True)
-        self.list = QListWidget()
-        self.setMaximumWidth(400)
 
-        self.h.addWidget(self.list)
-        self.h.addWidget(self.img)
+class InputPicker(Picker):
 
-        self.v.addWidget(self.select)
-        self.v.addLayout(self.h)
-        self.v.addWidget(self.validate)
+    def __init__(self, str_folder, img):
+        super().__init__(str_folder, img)
+        self.select.clicked.connect(self.load_folder)
 
-        self.setLayout(self.v)
+    def load_folder(self, x):
+        self.folder = str(QFileDialog.getExistingDirectory(
+            self, "Select Directory"))
 
-        self.select.clicked.connect(self.load_files)
-        self.list.currentItemChanged.connect(self.load_image)
+        self.select.setText(self.folder)
+        self.update_files(os.listdir(self.folder))
+
+
+class OutputPicker(Picker):
+
+    def __init__(self, str_folder, img):
+        super().__init__(str_folder, img)
+        self.select.clicked.connect(self.load_folder)
+
+    def load_folder(self, x):
+        self.folder = str(QFileDialog.getExistingDirectory(
+            self, "Select Directory"))
+
+        self.select.setText(self.folder)
 
 
 class MyWidget(QWidget):
@@ -68,24 +82,42 @@ class MyWidget(QWidget):
         self.h = QHBoxLayout()
         self.v = QVBoxLayout()
 
-        self.A = ImageViewer("Select input folder A", "Add")
-        self.B = ImageViewer("Select input folder B", "Add")
-        self.C = ImageViewer("Select output folder", "Remove")
+        self.img = QLabel()
+        self.img.setFixedWidth(560)
+        self.img.setFixedHeight(800)
 
-        self.v.addWidget(self.A)
-        self.v.addWidget(self.B)
+        self.run = QPushButton("Run")
+        self.v.addWidget(self.run)
+        self.v.addWidget(self.img)
 
+        self.fileA = InputPicker("A", self.img)
+        self.fileB = InputPicker("B", self.img)
+        self.fileC = OutputPicker("C", self.img)
+
+        self.h.addWidget(self.fileA)
+        self.h.addWidget(self.fileB)
+        self.h.addWidget(self.fileC)
         self.h.addLayout(self.v)
-        self.h.addWidget(self.C)
 
         self.setLayout(self.h)
+
+        self.run.clicked.connect(self.run_alorithm)
+
+    def run_alorithm(self):
+        self.diff = DiffMerge(self.fileA.folder, self.fileB.folder, self.fileC.folder, 15)
+        self.diff.load()
+        self.diff.diff_and_merge()
+        self.diff.create_merge()
+
+        src = [x[0] for x in self.diff.merge_paths]
+        self.fileC.update_files(src)
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     widget = MyWidget()
-    widget.resize(800, 600)
+    widget.resize(1000, 600)
     widget.show()
 
     sys.exit(app.exec_())
