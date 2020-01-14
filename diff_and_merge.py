@@ -39,9 +39,9 @@ class DiffMerge:
 
     def load_path(folder):
         paths = []
-        for f in os.listdir(folder):
-            p = os.path.join(folder, f)
-            paths.append(p)
+        for root, dirs, files in os.walk(folder):
+            for f in files:
+                paths.append(os.path.join(root, f))
         return paths
 
     def load_img(paths):
