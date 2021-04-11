@@ -9,9 +9,9 @@ The purpose of this script is to take two folder of images (a and b) and merge i
 -   If images in (b) are not in (a), these images are added. (Missing image)
 -   If an image is both in (a) and (b), the image from (a) is kept. (New image)
 
-The script can be used for example to create a new folder of image (c) based on a scanlation of a manga (a)
+**The script can be used for example to create a new folder of image (c) based on a scanlation of a manga (a)
 and the original manga (b).
-(c) will contain the original manga with the page translated but without the images added by the scanlation team.
+(c) will contain the original manga with the page translated but without the images added by the scanlation team.**
 
 # How to use it ?
 
